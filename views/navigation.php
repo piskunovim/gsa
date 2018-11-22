@@ -8,19 +8,20 @@
       <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ml-auto">
           <?php
-            if(!isset($_SESSION["loggedin"])){
+            if(isset($_SESSION["loggedin"])){
+              if($_SESSION["permission"] == "admin"){
           ?>
           <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="/sign-up">Sign-up</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link js-scroll-trigger" href="/login">Log-in</a>
+            <a class="nav-link js-scroll-trigger" href="/admin">Admin</a>
           </li>
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/about">About us</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="/logout">Logout</a>
+          </li>
           <?php
-            } else {
+              } else {
           ?>
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/child-sheet">View Child Sheet</a>
@@ -34,6 +35,20 @@
           <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/logout">Logout</a>
           </li>
+          </li>
+          <?php
+              }// if not loggedin and not admin
+
+            } else {
+          ?>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="/sign-up">Sign-up</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="/login">Log-in</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="/about">About us</a>
           <?php 
             }
           ?>

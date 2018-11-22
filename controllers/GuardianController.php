@@ -1,0 +1,9 @@
+<?php
+
+/**
+* GuardianController 
+*/
+
+class GuardianController {
+
+}

@@ -38,11 +38,17 @@
           case "financial-info":
               require DIR_VIEWS.'pages/financial-info.php';
               break;
+          case "admin":
+              require DIR_VIEWS.'pages/admin.php';
+              break;
           default:
               require DIR_VIEWS.'pages/404.php';
       }
 
-      require DIR_VIEWS.'footer.php';
+      // for admin page we have different scripts
+      if($currentPage != "admin"){
+        require DIR_VIEWS.'footer.php';
+      }
     ?>
 
   </body>

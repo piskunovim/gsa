@@ -17,7 +17,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     	// Setting username
     	$newUser->setUsername($_POST["username"]);
     	// Checking username for existence
-        if($newUser->checkForExistence()){
+        if($newUser->checkForExistenceByUsername()){
           $username_err = "This username is already taken.";
         }
     }

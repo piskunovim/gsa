@@ -153,6 +153,14 @@ class DatabaseController {
 			$this->initialize($query,$params);
 			return $this->sQuery->fetchColumn();
 		}
+	     /**
+       *  Returns the last inserted id.
+       *  @return string
+       */	
+		public function lastInsertId() {
+			return $this->dbc->lastInsertId();
+		}	
+
 
 }
 

@@ -32,7 +32,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(empty($username_err) && empty($password_err)){
 
         //print_r($loginUser->authenticate());  
-        $userData = $loginUser->authenticate();
+        $userData = $loginUser->get();
         if($userData){
             if($loginUser->matchPasswords($_POST["password"], $userData['password'])){
                 // Password is correct, so start a new session
@@ -42,6 +42,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $_SESSION["loggedin"] = true;
                 $_SESSION["id"] = $userData['id'];
                 $_SESSION["username"] = $userData['username']; 
+                $_SESSION["permission"] = $userData['permission'];
 
                 // Redirect user to welcome page
                 header("location: /");
