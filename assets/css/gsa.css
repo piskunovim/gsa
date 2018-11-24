@@ -255,3 +255,7 @@ img::-moz-selection {
   background: RGB(94,71,250,0.3); 
   padding: 20px;
 }
+
+.datepicker{
+  background-color: #fff !important;
+}

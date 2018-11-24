@@ -72,7 +72,11 @@ class DatabaseController {
 					foreach($this->parameters as $param)
 					{
 						$parameters = explode("\x7F",$param);
-						$this->sQuery->bindParam($parameters[0],$parameters[1]);
+						if($parameters[1] == null){
+							$this->sQuery->bindParam($parameters[0],$parameters[1], PDO::PARAM_NULL);
+						} else{
+							$this->sQuery->bindParam($parameters[0],$parameters[1]);
+						}
 					}		
 				}
 				# Execute SQL 

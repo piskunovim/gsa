@@ -55,7 +55,7 @@ if($existedUser['categoryId'] != $_POST['categoryId']){
 $response = array("status" => 0, "msg" => "Failed to update user. Please, try again.");
 
 $userUpdated = $updateUser->update(); // boolean
-if($updateUser->update()){
+if($userUpdated){
 	$response = array("status" => 1, "msg" => "User updated successfully");
 }
 
