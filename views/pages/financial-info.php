@@ -1,3 +1,6 @@
+<?php
+if(isset($_SESSION["loggedin"])){
+?>
 <br><br><br>
 <div class="container">
 <h1>Financial info</h1>
@@ -98,3 +101,9 @@
 
 
 </div>
+
+<?php
+} else {
+  header("location: /404");
+}
+?>

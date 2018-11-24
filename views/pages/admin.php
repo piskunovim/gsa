@@ -1,3 +1,6 @@
+<?php
+if($_SESSION["permission"] == "admin"){
+?>
 <br><br><br>
 <main id="app">
 
@@ -10,13 +13,15 @@
 				<a class="nav-item nav-link active" id="nav-users-tab" data-toggle="tab" href="#nav-users" role="tab" aria-controls="nav-users" aria-selected="true">Users</a>
 				<a class="nav-item nav-link" id="nav-children-tab" data-toggle="tab" href="#nav-children" role="tab" aria-controls="nav-children" aria-selected="false">Children</a>
 				<a class="nav-item nav-link" id="nav-guardians-tab" data-toggle="tab" href="#nav-guardians" role="tab" aria-controls="nav-guardians" aria-selected="false">Guardians</a>
+				<a class="nav-item nav-link" id="nav-schedule-tab" data-toggle="tab" href="#nav-schedule" role="tab" aria-controls="nav-schedule" aria-selected="false">Schedule</a>
+				<a class="nav-item nav-link" id="nav-invoice-tab" data-toggle="tab" href="#nav-invoice" role="tab" aria-controls="nav-invoice" aria-selected="false">Invoices</a>
 			</div>
 		</nav>
 		<!-- Tab panes -->
 		<div class="tab-content" id="nav-tabContent">
 			<!-- Users -->
 			<div class="tab-pane fade show active" id="nav-users" role="tabpanel" aria-labelledby="nav-users-tab">
-
+				<br>
 				<div v-if="users.length > 0">
 					<label>User Search:</label>
 					<input type="text" v-model="userFilter" v-on:change="filterUsers">
@@ -97,6 +102,14 @@
 								<label for="userPhoneNumber">Phone Number</label> 
 								<input type="text" class="form-control" id="userPhoneNumber"  v-model="newUser.phoneNumber">
 							</div>
+							<div class="form-group dropdown">
+								<label for="userChildDropDown">Child</label>
+								<input type="text" class="form-control" placeholder="Start searching for a child..." v-on:keyup="showUserChildHints" v-on:change="showUserChildHints" id="searchUserChildrenInput" data-toggle="dropdown">
+		      			        <ul id="userChildDropDown" class="dropdown-menu" data-input="searchUserChildrenInput"></ul>
+							</div>
+							<div class="form-group">
+								<input type="hidden" class="form-control" id="userChildId"  v-model="newUser.childId">
+							</div>
 							<div class="form-group">
 								<label for="userFamilyType">Family Type</label> 
 								<input type="text" class="form-control" id="userFamilyType"  v-model="newUser.familyType">
@@ -113,6 +126,8 @@
 								<label for="userPassword">Password</label> 
 								<input type="password" class="form-control" id="userPassword"  v-model="newUser.newPassword">
 							</div>
+
+
 
 						</div>
 						<div class="modal-footer">
@@ -139,6 +154,7 @@
 					<table class="table">
 						<thead>
 							<tr>
+								<th scope="col">Id</th>
 								<th scope="col">First Name</th>
 								<th scope="col">Last Name</th>
 								<th scope="col">Phone Number</th>
@@ -146,6 +162,7 @@
 						</thead>
 						<tbody>
 							<tr v-for="c in children">
+								<td>{{ c.id }}</td>
 								<td>{{ c.firstName }}</td>
 								<td>{{ c.lastName }}</td>
 								<td>{{ c.phoneNumber }}</td>
@@ -302,6 +319,87 @@
 			</div>
 			<!-- Guardians ends -->
 
+			<!-- Schedule -->
+			<div class="tab-pane fade" id="nav-schedule" role="tabpanel" aria-labelledby="nav-schedule-tab">
+				<br>
+				<label>Сhild's ID:</label>
+				<input type="text"  id="scheduleChildId"  v-model="scheduleChildId" v-on:change="getChildSheet" size="7">
+					<button type="button" class="btn btn-success" data-toggle="modal" data-target="#newChildSheetModal" style="float:right;" v-on:click="showAddChildModal" v-if="childSheetName">
+						Add child sheet instance
+					</button>
+				<div class="child-sheet" v-if="childSheet.length > 0">
+				<h3>{{ childSheetName }}</h3>
+				<table class="table">
+					<thead>
+					<tr>
+						<th scope="col">Date</th>
+						<th scope="col">Period</th>
+						<th scope="col">Presence</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr v-for="cs in childSheet">
+						<td v-if="cs.date">{{ cs.date }}</td>
+						<td v-else>No content</td>
+
+						<td v-if="cs.date">{{ cs.period }}</td>
+						<td v-else>No content</td>
+
+						<td v-if="cs.date">{{ cs.presence }}</td>
+						<td v-else>No content</td>
+
+						<td><a href="#!" class="action" v-on:click="showEditChildSheetModal(ch)">Edit</a> | <a href="#!" class="action" v-on:click="deleteChildSheetInstance(ch.id)">Remove</a></td>
+					</tr>
+					</tbody>
+					</table>
+				</div>
+				<div v-else>
+					<br>
+					<h3 v-if="childSheetName">{{ childSheetName }} - No data for this child</h3>
+					Nothing to show yet. Please, specify child id and press Enter to load sheet.
+				</div>
+			</div>
+			<!-- Modal For Schedule  -->
+			<div class="modal fade" id="newChildSheetModal" tabindex="-1" role="dialog" aria-labelledby="newChildSheetModal" aria-hidden="true">
+				<div class="modal-dialog modal-lg" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 v-if="editChildSheet==0" class="modal-title" id="childSheetModalLabel">Add child sheet instance - {{ childSheetName }}</h5>
+							<h5 v-else class="modal-title" id="childSheetModalLabel">Edit shild sheet instance</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="clearChildSheetModal">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="childSheetDate">Date</label> 
+								<input type="text" class="form-control datepicker" id="childSheetDate"  v-model="newChildSheetInstance.date" placeholder="Date">
+							</div>
+							<div class="form-group">
+								<label for="childSheetPeriod">Period</label> 
+								<input type="text" class="form-control" id="childSheetPeriod"  v-model="newChildSheetInstance.period" placeholder="Text">
+							</div>
+							<div class="form-group">
+								<label for="childSheetPresence">Presence</label> 
+								<input type="text" class="form-control" id="childSheetPresence"  v-model="newChildSheetInstance.presence" placeholder="Text">
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal" v-on:click="clearChildSheetModal">Close</button>
+							<button v-if="editChildSheet==0" type="button" class="btn btn-primary add-vacancy" v-on:click="addChildSheetInstance">Submit</button>
+							<!-- editChild hidden by default -->
+							<button v-if="editChildSheet>0" type="button" class="btn btn-primary" v-on:click="updateChildSheetInstance">Update Child Sheet Instance</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Schedule ends -->
+
+			<!-- Invoice information  -->
+			<div class="tab-pane fade" id="nav-invoice" role="tabpanel" aria-labelledby="nav-invoice-tab">
+				<br>
+				Invoice information will be set here.
+			</div>
 
 
 		</div>
@@ -320,6 +418,11 @@
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script type="text/javascript">
 
+	function selectUserChildDropDown(childString, childId){
+	      		$('#searchUserChildrenInput').val(childString.trim());
+	      		vue.newUser.childId = childId;
+	}
+
 	$(function(){		
 		$('.nav-tabs .nav-item a').click(function (e) {
 			e.preventDefault()
@@ -329,26 +432,35 @@
 		/* Activate datepickers */
 		$(".datepicker").flatpickr({ dateFormat: 'Y-m-d' });
 		//$( ".datepicker" ).datepicker({ dateFormat: 'yy-mm-dd' });
+
+		
 	});
 
 	let vue = new Vue({
 		el: '#app',
 		data: {
-			users:[],
+			users:[],   // <======= USERS
 			storedUsers: [],
 			userFilter: "",
 	        newUser: {}, // used for editing user too
 	        editUser: 0,
-	        children: [],
+	        children: [], // <======= CHILDREN
 			storedChildren: [],
 			childFilter: "",
 	        newChild: {}, // used for editing child too
 	        editChild: 0,
-	        guardians: [],
+	        guardians: [], // <======= GUARDIANS
 	        storedGuardians: [],
 	        guardianFilter: "",
 	        newGuardian: {}, // used for editing guardians too
 	        editGuardian: 0,
+	        scheduleChildId: "",  // <======= SCHEDULE (CHILD SHEET)
+	        childSheetName: "",
+	        childSheet: [],
+	        storedChildSheet: [],
+	        newChildSheetInstance: {}, // used for editing child sheet too
+	        editChildSheet: 0,
+
 	    },
 	    methods: {
 	      	updateUserList: ()=>{
@@ -441,6 +553,19 @@
 	      		vue.clearUserModal();
 	      		vue.editUser = 1;
 	      		vue.newUser = JSON.parse(JSON.stringify(user));
+	      		if(vue.newUser.childId){
+	      			let found = false;
+	      			for(let c of vue.children){
+	      				if(c.id == vue.newUser.childId){
+	      					$('#searchUserChildrenInput').val(c.firstName + " " + c.lastName);
+	      					found = true;
+	      					break;
+	      				}
+	      			}
+	      			if(!found){
+	      				$('#searchUserChildrenInput').val("Attached child not found");
+	      			}
+	      		}
 
 	      		$("#newUserModal").modal("show");
 	      	},
@@ -474,6 +599,8 @@
 	      	/* To clear modal form when on closing */
 	      	clearUserModal: ()=>{
 	      		vue.newUser= {};
+	      		$('#searchUserChildrenInput').val("");
+	      		$('#userChildDropDown').html("");
 	      	},
 	      	filterUsers: ()=>{
 	      		let users = vue.storedUsers;
@@ -483,6 +610,24 @@
 	      			let userFilterString = vue.userFilter;
 	      			vue.users = users.filter(u => u.username.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1 || u.firstName.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1 ||  u.lastName.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1);
 	      		}
+	      	},
+	      	showUserChildHints: () => {
+			    const searchUserChildString = $('#searchUserChildrenInput').val().toLowerCase();
+			    $('#userChildDropDown').html("");
+			    if (typeof searchUserChildString != "undefined" && searchUserChildString !== "" ) {
+			    	let limit =  10;
+			      	for (let c of vue.children) {
+			      		if(limit === -1){
+			      			break;
+			      		}
+			            let firstName = c.firstName.toLowerCase();
+			            if(firstName.indexOf(searchUserChildString) !== -1 ){
+			                $('#userChildDropDown').append('<li onclick="selectUserChildDropDown(\''+c.firstName+' '+c.lastName+'\', '+ c.id +')">'+c.firstName+' '+c.lastName+'</li>');
+			            }
+			            limit--;
+			        }
+			        $('.dropdown').dropdown();
+			    }
 	      	},
 	      	
 	      	/*==================================== CHILDREN ===========================================*/
@@ -759,6 +904,152 @@
 	      			vue.guardians = guardians.filter(g => g.firstName.toLowerCase().indexOf(guardianFilterString.toLowerCase()) !== -1 ||  g.lastName.toLowerCase().indexOf(guardianFilterString.toLowerCase()) !== -1);
 	      		}
 	      	},
+
+
+	      	/*==================================== CHILD SHEET ===========================================*/
+	      	getChildSheet: ()=>{
+	      		
+	      		vue.updateChildSheetList();
+
+	      		let found = false
+	      		for(let c of vue.children){
+	      			if(c.id == vue.scheduleChildId){
+	      				vue.childSheetName = c.firstName + " " + c.lastName;	
+	      				found = true;
+	      				break;
+	      			}
+	      		}
+	      		if(!found){
+	      			vue.childSheetName	= "Child not found, please clarify child id by using 'Child' tab."	
+	      		}
+	      	},
+	      	updateChildSheetList: ()=>{
+	      		$.ajax({
+	      			url: '/api/childSheet/read.php?userId='+vue.scheduleChildId,
+	      			type: 'GET',
+	      		}).done(function(data) {
+	      			if(data !== "null"){
+		      			if(data.length > 0){
+		      				vue.childSheet = JSON.parse(data);
+		      				vue.storedChildSheet = JSON.parse(data);
+		      			}
+	      			}
+	      		})
+	      		.fail(function(err) {
+	      			alert(JSON.stringify(err));
+	      		});
+	      	},
+	      	/* To add child sheet instance */
+	      	addChildSheetInstance: () =>{
+	      		if(!vue.scheduleChildId){
+	      			alert("Please specify user id");
+	      			return;
+	      		}
+
+	      		vue.newChildSheetInstance.userId = vue.scheduleChildId;
+
+	      		if(!vue.newChildSheetInstance.date && !vue.newChildSheetInstance.period && !vue.newChildSheetInstance.presence ){
+	      			alert("In order to create new child sheet instance you must fill at least one field.")
+	      			return;
+	      		}
+
+	      		$.post('/api/childSheet/create.php',{ ...vue.newChildSheetInstance }).done(function(response) {
+	      			$("#newChildSheetModal").modal("hide");
+	      			try{
+	      				const r = JSON.parse(response);
+	      				if(r.msg){
+	      					console.log(r.msg);
+	      				} else {
+	      					alert("Failed to parse response data.");
+	      				}
+	      			} catch(e){
+	      				alert(e);
+	      			}
+	      			vue.clearChildSheetModal();  
+	      			vue.updateChildSheetList();
+	      			/*if(JSON.parse(response).status !== "error"){
+	      				console.log(response.status);
+	      			}*/
+	      		}).fail(function(){
+	      			alert("Failed to send your data. Please, try again.")
+	      		});
+	      		
+	      	},
+	      	/* To update child sheet instance */
+	      	updateChildSheetInstance: ()=>{
+	      		
+	      		if(!vue.newChildSheetInstance.date && !vue.newChildSheetInstance.period && !vue.newChildSheetInstance.presence ){
+	      			alert("In order to update child sheet instance you must fill at least one field.")
+	      			return;
+	      		}
+
+	      		const childSheetInstance = { 
+	      			...vue.newChildSheetInstance
+	      		};
+	      		$.ajax({
+	      			url: '/api/childSheet/update.php',
+	      			type: 'POST',
+	      			data: childSheetInstance,
+	      		}).done(function(response) {
+	      			try{
+	      				const r = JSON.parse(response);
+	      				if(r.msg){
+	      					console.log(r.msg);
+	      				} else {
+	      					alert("Failed to parse response data.");
+	      				}
+	      			} catch(e){
+	      				alert(e);
+	      			}
+	      			vue.clearChildSheetModal();
+	      		})
+	      		.fail(function() {
+	      			alert("Failed to update child sheet. Please, try again.");
+	      		});
+	      		$("#newChildSheetModal").modal("hide");
+	      		vue.updateChildSheetList();
+	      		
+	      	},
+	      	/* Two methods to show correct button in the modal form */
+	      	showEditChildSheetModal: (childSheetInstance) =>{
+	      		vue.clearChildSheetModal();
+	      		vue.editChildSheet = 1;
+	      		vue.newChildSheetInstance = JSON.parse(JSON.stringify(childSheetInstance));
+
+	      		$("#newChildSheetModal").modal("show");
+	      	},
+	      	showAddChildSheetModal: () =>{
+	      		vue.clearChildSheetModal();
+	      		vue.editChildSheet = 0;
+	      	},
+	      	/* To remove child sheet instance from the database */
+	      	deleteChildSheetInstance: (id) => {
+	      		$.ajax({
+	      			url: '/api/childSheet/delete.php?id='+id,
+	      			type: 'GET',
+	      		}).done(function(response) {
+	      			try{
+	      				const r = JSON.parse(response);
+	      				if(r.msg){
+	      					alert(r.msg);
+	      				} else {
+	      					alert("Failed to parse response data.");
+	      				}
+	      			} catch(e){
+	      				alert(e);
+	      			}
+	      			vue.updateChildSheetList();
+	      		})
+	      		.fail(function() {
+	      			alert("Failed to remove child sheet instance. Please, try again.");
+	      		});
+	      	},
+
+	      	/* To clear modal form when on closing */
+	      	clearChildSheetModal: ()=>{
+	      		vue.newChildSheetInstance = {};
+	      	    $(".datepicker").flatpickr({ dateFormat: 'Y-m-d' });
+	      	},
 	      },
 	      /* Initial loading */
 	      created: ()=>{	
@@ -797,3 +1088,8 @@
 	      }
 	  });
 	</script>
+<?php
+} else {
+	header("location: /404");
+}
+?>

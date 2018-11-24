@@ -59,6 +59,19 @@ if($userUpdated){
 	$response = array("status" => 1, "msg" => "User updated successfully");
 }
 
+/* If user attached child - check this relationship */
+//print_r($_POST);
+if(isset($_POST['childId'])){
+	$updateUser->setChildId($_POST['childId']);
+	$existedRecordId = $updateUser->checkChildExistence();
+	if($existedRecordId){
+		$updateUser->updateChildInfo($existedRecordId);
+	} else {
+		$updateUser->updateChildInfo();
+	}
+}
+
+
 // set response code - 200 OK
 http_response_code(200);
  

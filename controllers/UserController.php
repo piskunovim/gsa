@@ -71,6 +71,10 @@ class UserController {
      * @var string $confirmPassword
      */
     protected $confirmPassword;
+    /**
+     * @var string $childId
+     */
+    protected $childId;
      /**
      * @param string $id
      */
@@ -295,6 +299,20 @@ class UserController {
     {
         return $this->confirmPassword;
     }
+    /**
+     * @param string $childId
+     */
+    public function setChildId($childId)
+    {
+        $this->childId = trim($childId);
+    }
+    /**
+     * @return string
+     */
+    public function getChildId()
+    {
+        return $this->childId;
+    }
 
     public function checkForExistenceByUsername(){
         $db = new DatabaseController();
@@ -378,8 +396,12 @@ class UserController {
 
         $id = $db->lastInsertId();
 
-        if($id && $this->categoryId){
-            $db->query("INSERT INTO permissions (userId, categoryId) VALUES(:id,:categoryId) ON DUPLICATE KEY UPDATE categoryId=:categoryId", array('id' => $id, 'categoryId' => $this->categoryId));
+        if($id){
+            if($this->categoryId){
+                $db->query("INSERT INTO permissions (userId, categoryId) VALUES(:id,:categoryId) ON DUPLICATE KEY UPDATE categoryId=:categoryId", array('id' => $id, 'categoryId' => $this->categoryId));
+            } else{
+                $db->query("INSERT INTO permissions (userId, categoryId) VALUES(:id,:categoryId) ON DUPLICATE KEY UPDATE categoryId=:categoryId", array('id' => $id, 'categoryId' => "2"));
+            }
         }
 
 
@@ -468,19 +490,36 @@ class UserController {
     public function get(){
         if($this->id){
           $db = new DatabaseController();
-          $user = $db->query("SELECT u.id, u.username, u.password, u.email, u.firstName, u.lastName, u.gender, u.dateOfBirth, u.dateOfEntry, u.addressLine1, u.addressLine2, u.city, u.phoneNumber, u.familyType, uc.name permission, p.categoryId FROM users u LEFT JOIN permissions p ON u.id = p.userId LEFT JOIN userCategories uc ON p.categoryId=uc.id WHERE u.id=:id;", array('id' => $this->id));
+          $user = $db->query("SELECT u.id, u.username, u.password, u.email, u.firstName, u.lastName, u.gender, u.dateOfBirth, u.dateOfEntry, u.addressLine1, u.addressLine2, u.city, u.phoneNumber, u.familyType, uc.name permission, p.categoryId, uch.childId FROM users u LEFT JOIN permissions p ON u.id = p.userId LEFT JOIN userCategories uc ON p.categoryId=uc.id LEFT JOIN userChildren uch ON u.id=uch.userId WHERE u.id=:id;", array('id' => $this->id));
           $db->closeConnection();
           return $user[0];
         } elseif($this->username){
           $db = new DatabaseController();
-          $user = $db->query("SELECT u.id, u.username, u.password, u.email, u.firstName, u.lastName, u.gender, u.dateOfBirth, u.dateOfEntry, u.addressLine1, u.addressLine2, u.city, u.phoneNumber, u.familyType, uc.name permission, p.categoryId FROM users u LEFT JOIN permissions p ON u.id = p.userId LEFT JOIN userCategories uc ON p.categoryId=uc.id WHERE u.username=:username;", array('username' => $this->username));
+          $user = $db->query("SELECT u.id, u.username, u.password, u.email, u.firstName, u.lastName, u.gender, u.dateOfBirth, u.dateOfEntry, u.addressLine1, u.addressLine2, u.city, u.phoneNumber, u.familyType, uc.name permission, p.categoryId, uch.childId FROM users u LEFT JOIN permissions p ON u.id = p.userId LEFT JOIN userCategories uc ON p.categoryId=uc.id LEFT JOIN userChildren uch ON u.id=uch.userId WHERE u.username=:username;", array('username' => $this->username));
           $db->closeConnection();
           return $user[0];
         } else{
           $db = new DatabaseController();
-          $users = $db->query("SELECT u.id, u.username, u.password, u.email, u.firstName, u.lastName, u.gender, u.dateOfBirth, u.dateOfEntry, u.addressLine1, u.addressLine2, u.city, u.phoneNumber, u.familyType, uc.name permission, p.categoryId FROM users u LEFT JOIN permissions p ON u.id = p.userId LEFT JOIN userCategories uc ON p.categoryId=uc.id;");
+          $users = $db->query("SELECT u.id, u.username, u.password, u.email, u.firstName, u.lastName, u.gender, u.dateOfBirth, u.dateOfEntry, u.addressLine1, u.addressLine2, u.city, u.phoneNumber, u.familyType, uc.name permission, p.categoryId, uch.childId FROM users u LEFT JOIN permissions p ON u.id = p.userId LEFT JOIN userCategories uc ON p.categoryId=uc.id LEFT JOIN userChildren uch ON u.id=uch.userId;");
           $db->closeConnection();
           return $users;
         }
+    }
+
+    public function checkChildExistence(){
+        $db = new DatabaseController();
+        $exist = $db->single("SELECT id FROM userChildren WHERE userId=:id;", array('id' => $this->id));
+        $db->closeConnection();
+        return $exist;
+    }
+
+    public function updateChildInfo($id = null){
+        $db = new DatabaseController();
+        if($id){
+          $db->query("UPDATE userChildren SET childId=:childId WHERE id=:id", array('id' => $id, 'childId' => $this->childId));
+        } else {
+          $db->query("INSERT INTO userChildren (userId, childId) VALUES(:userId,:childId)", array('userId' => $this->id, 'childId' => $this->childId));
+        }
+        $db->closeConnection();
     }
 }
