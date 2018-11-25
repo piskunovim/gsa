@@ -15,6 +15,7 @@ if($_SESSION["permission"] == "admin"){
 				<a class="nav-item nav-link" id="nav-guardians-tab" data-toggle="tab" href="#nav-guardians" role="tab" aria-controls="nav-guardians" aria-selected="false">Guardians</a>
 				<a class="nav-item nav-link" id="nav-schedule-tab" data-toggle="tab" href="#nav-schedule" role="tab" aria-controls="nav-schedule" aria-selected="false">Schedule</a>
 				<a class="nav-item nav-link" id="nav-invoice-tab" data-toggle="tab" href="#nav-invoice" role="tab" aria-controls="nav-invoice" aria-selected="false">Invoices</a>
+				<a class="nav-item nav-link" id="nav-appointment-tab" data-toggle="tab" href="#nav-appointment" role="tab" aria-controls="nav-appointment" aria-selected="false">Appointment of Guardians</a>
 			</div>
 		</nav>
 		<!-- Tab panes -->
@@ -246,6 +247,7 @@ if($_SESSION["permission"] == "admin"){
 					<table class="table">
 						<thead>
 							<tr>
+								<th scope="col">Id</th>
 								<th scope="col">First Name</th>
 								<th scope="col">Last Name</th>
 								<th scope="col">Phone Number</th>
@@ -253,6 +255,7 @@ if($_SESSION["permission"] == "admin"){
 						</thead>
 						<tbody>
 							<tr v-for="g in guardians">
+								<td>{{ g.id }}</td>
 								<td>{{ g.firstName }}</td>
 								<td>{{ g.lastName }}</td>
 								<td>{{ g.phoneNumber }}</td>
@@ -560,6 +563,62 @@ if($_SESSION["permission"] == "admin"){
 			<!-- Invoice ends -->
 
 
+
+			<!-- Appointment -->
+			<div class="tab-pane fade" id="nav-appointment" role="tabpanel" aria-labelledby="nav-appointment-tab">
+				<br>
+				<label>Сhild's ID:</label>
+				<input type="text"  id="appointmentChildId"  v-model="appointmentChildId" v-on:change="getAppointmentGuardians" size="7">
+				<div class="appointment" v-if="appointment.length > 0">
+					<h3>{{ appointmentChildName }}</h3>
+
+					<div style="margin:30px 0">
+						<input type="text" placeholder="Start searching for a guardian..." v-on:keyup="showAppointmentHints" v-on:change="showAppointmentHints" id="searchAppointmentInput" data-toggle="dropdown" size="30">
+		      			<ul id="appointmentDropDown" class="dropdown-menu" data-input="searchAppointmentInput"></ul>
+						<button type="button" class="btn btn-success" v-on:click="attachGuardian" v-if="appointmentChildName">
+							Attach guardian
+						</button>
+					</div>
+
+					<table class="table">
+					<thead>
+					<tr>
+						<th scope="col">First Name</th>
+						<th scope="col">Last Name</th>
+						<th scope="col">Phone Number</th>
+						<th scope="col">Family Type</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr v-for="a in appointment">
+						<td>{{ a.firstName || "Not set" }}</td>
+						<td>{{ a.lastName || "Not set" }}</td>
+						<td>{{ a.phoneNumber || "Not set" }}</td>
+						<td>{{ a.familyType || "Not set" }}</td>
+						<td><a href="#!" class="action" v-on:click="deleteAppointment(a.id)">Remove</a></td>
+					</tr>
+					</tbody>
+					</table>
+				</div>
+				<div v-else>
+					<br>
+					<h3 v-if="appointmentChildName">{{ appointmentChildName }} - No data for this child</h3>
+					Nothing to show yet. Please, specify child id and press Enter to load guardians.
+
+					<div style="margin:30px 0"  v-if="appointmentChildName">
+						<input type="text" placeholder="Start searching for a guardian..." v-on:keyup="showAppointmentHints2" v-on:change="showAppointmentHints2" id="searchAppointmentInput2" data-toggle="dropdown" size="30">
+		      			<ul id="appointmentDropDown2" class="dropdown-menu" data-input="searchAppointmentInput2"></ul>
+						<button type="button" class="btn btn-success" v-on:click="attachGuardian">
+							Attach guardian
+						</button>
+					</div>
+				</div>
+			</div>
+			<!-- Appointment ends -->
+
+
+
+
 		</div>
 
 	</div>
@@ -579,6 +638,16 @@ if($_SESSION["permission"] == "admin"){
 	function selectUserChildDropDown(childString, childId){
 	      		$('#searchUserChildrenInput').val(childString.trim());
 	      		vue.newUser.childId = childId;
+	}
+
+	function selectAppointmentDropDown(guardianString, guardianId){
+	      		$('#searchAppointmentInput').val(guardianString.trim());
+	      		vue.appointmentGuardianId = guardianId;
+	}
+
+	function selectAppointmentDropDown2(guardianString, guardianId){
+	      		$('#searchAppointmentInput2').val(guardianString.trim());
+	      		vue.appointmentGuardianId = guardianId;
 	}
 
 	$(function(){		
@@ -624,6 +693,10 @@ if($_SESSION["permission"] == "admin"){
 	        storedInvoices: [],
 	        newInvoice: {}, // used for editing invoice too
 	        editInvoice: 0,
+	        appointmentChildId: "",  // <======= APPOINTMENT
+	        appointmentGuardianId: "",
+	        appointmentChildName: "",
+	        appointment: [],
 	    },
 	    methods: {
 	      	updateUserList: ()=>{
@@ -794,8 +867,8 @@ if($_SESSION["permission"] == "admin"){
 			      		if(limit === -1){
 			      			break;
 			      		}
-			            let firstName = c.firstName.toLowerCase();
-			            if(firstName.indexOf(searchUserChildString) !== -1 ){
+			            let fullName = c.firstName.toLowerCase() + " " + c.lastName.toLowerCase();
+			            if(fullName.indexOf(searchUserChildString) !== -1 ){
 			                $('#userChildDropDown').append('<li onclick="selectUserChildDropDown(\''+c.firstName+' '+c.lastName+'\', '+ c.id +')">'+c.firstName+' '+c.lastName+'</li>');
 			            }
 			            limit--;
@@ -1368,6 +1441,136 @@ if($_SESSION["permission"] == "admin"){
 	      	/* To clear modal form when on closing */
 	      	clearInvoiceModal: ()=>{
 	      		vue.newInvoice = {};
+	      	},
+
+
+
+	      	/*==================================== APPOINTMENT ===========================================*/
+
+	      	getAppointmentGuardians: ()=>{
+	      		
+	      		vue.updateAppointmentList();
+
+	      		let found = false
+	      		for(let c of vue.children){
+	      			if(c.id == vue.appointmentChildId){
+	      				vue.appointmentChildName = c.firstName + " " + c.lastName;	
+	      				found = true;
+	      				break;
+	      			}
+	      		}
+	      		if(!found){
+	      			vue.invoiceName	= "Child not found, please clarify child id by using 'Child' tab."	
+	      		}
+	      	},
+	      	updateAppointmentList: ()=>{
+	      		$.ajax({
+	      			url: '/api/appointment/read.php?childId='+vue.appointmentChildId,
+	      			type: 'GET',
+	      		}).done(function(data) {
+	      			if(data !== "null"){
+		      			if(data.length > 0){
+		      				vue.appointment = JSON.parse(data);
+		      			}
+	      			}
+	      		})
+	      		.fail(function(err) {
+	      			alert(JSON.stringify(err));
+	      		});
+	      	},
+
+	      	deleteAppointment: (id) => {
+	      		$.ajax({
+	      			url: '/api/appointment/delete.php?id='+id,
+	      			type: 'GET',
+	      		}).done(function(response) {
+	      			/*try{
+	      				const r = JSON.parse(response);
+	      				if(r.msg){
+	      					alert(r.msg);
+	      				} else {
+	      					alert("Failed to parse response data.");
+	      				}
+	      			} catch(e){
+	      				alert(e);
+	      			}*/
+	      			vue.updateAppointmentList();
+	      		})
+	      		.fail(function() {
+	      			alert("Failed to remove appointment instance. Please, try again.");
+	      		});
+	      	},
+
+	      	showAppointmentHints: () => {
+			    const searchGuardianString = $('#searchAppointmentInput').val().toLowerCase();
+			    $('#appointmentDropDown').html("");
+			    if (typeof searchGuardianString != "undefined" && searchGuardianString !== "" ) {
+			    	let limit =  10;
+			      	for (let g of vue.guardians) {
+			      		if(limit === -1){
+			      			break;
+			      		}
+			            let fullName = g.firstName.toLowerCase() + " " + g.lastName.toLowerCase();
+			            if(fullName.indexOf(searchGuardianString) !== -1 ){
+			                $('#appointmentDropDown').append('<li onclick="selectAppointmentDropDown(\''+g.firstName+' '+g.lastName+'\', '+ g.id +')">'+g.firstName+' '+g.lastName+'</li>');
+			            }
+			            limit--;
+			        }
+			        $('.dropdown').dropdown();
+			    }
+	      	},
+
+	      	showAppointmentHints2: () => {
+			    const searchGuardianString = $('#searchAppointmentInput2').val().toLowerCase();
+			    $('#appointmentDropDown2').html("");
+			    if (typeof searchGuardianString != "undefined" && searchGuardianString !== "" ) {
+			    	let limit =  10;
+			      	for (let g of vue.guardians) {
+			      		if(limit === -1){
+			      			break;
+			      		}
+			            let fullName = g.firstName.toLowerCase() + " " + g.lastName.toLowerCase();
+			            if(fullName.indexOf(searchGuardianString) !== -1 ){
+			                $('#appointmentDropDown2').append('<li onclick="selectAppointmentDropDown2(\''+g.firstName+' '+g.lastName+'\', '+ g.id +')">'+g.firstName+' '+g.lastName+'</li>');
+			            }
+			            limit--;
+			        }
+			        $('.dropdown').dropdown();
+			    }
+	      	},
+
+	      	attachGuardian: () =>{
+	      		if(!vue.appointmentChildId){
+	      			alert("Error! Child id is not defined!");
+	      			return;
+	      		}
+	      		if(!vue.appointmentGuardianId){
+	      			alert("Error! Guardian id is not defined!");
+	      			return;
+	      		}
+	      		if(vue.appointment.length < 5){
+
+	      			$.post('/api/appointment/create.php',{ childId: vue.appointmentChildId, guardianId: vue.appointmentGuardianId  }).done(function(response) {
+		      			try{
+		      				if(response){
+		      					console.log("Attached new guardian to user");
+		      				} else {
+		      					alert("Error: cannot attach guardian to user. Please, try again.")
+		      				}
+
+		      			} catch(e){
+		      				alert(e);
+		      			}
+		  
+		      			vue.updateAppointmentList();
+
+		      		}).fail(function(){
+		      			alert("Failed to send your data. Please, try again.")
+		      		});
+
+	      		} else {
+	      			alert("Reached maximum number of guardians for the current user");
+	      		}
 	      	},
 
 

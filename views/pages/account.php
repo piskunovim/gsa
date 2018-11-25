@@ -7,7 +7,7 @@ if(isset($_SESSION["loggedin"])){
 <main id="app">
 
 
-<div v-id="user">
+<div v-if="user">
 	<h4>User</h4>
 	<div v-if="user.username">Your username: {{ user.username}}</div>
 	<div v-if="user.firstName">First Name: {{ user.firstName}}</div>
@@ -20,13 +20,23 @@ if(isset($_SESSION["loggedin"])){
 	
 </div>
 <br>
-<div v-id="child">
+<div v-if="child">
 	<h4>Child</h4>
 	<div v-if="child.firstName">First Name: {{ child.firstName}}</div>
 	<div v-if="child.lastName">Last Name: {{ child.lastName}}</div>
 	<div v-if="child.dateOfBirth">Date Of Birth: {{ child.dateOfBirth}}</div>
 	<div v-if="child.dateOfEntry">Date of Entry: {{ child.dateOfEntry}}</div>
 	<div v-if="child.phoneNumber">Phone Number: {{ child.phoneNumber}}</div>
+</div>
+<br>
+<div v-if="guardians">
+	<h4>Guardians</h4>
+	<div v-for="g in guardians" style="margin:30px 0px;">
+		<div v-if="g.firstName">First Name: {{ g.firstName}}</div>
+		<div v-if="g.lastName">Last Name: {{ g.lastName}}</div>
+		<div v-if="g.phoneNumber">Phone Number: {{ g.phoneNumber}}</div>
+		<div v-if="g.familyType">Family Type: {{ g.familyType}}</div>
+	</div>
 </div>
 
 <br>
@@ -45,7 +55,7 @@ if(isset($_SESSION["loggedin"])){
       data: {
       	user: "",
       	child: "",
-      	guardians: ""
+      	guardians: []
       },
       methods: {
         
@@ -83,6 +93,23 @@ if(isset($_SESSION["loggedin"])){
               alert("Something went wrong. Please, reload the page.");
               console.log(JSON.stringify(err))
             });
+
+            $.ajax({
+              url: '/api/appointment/read.php',
+              type: 'GET',
+            }).done(function(data) {
+              //console.log(data);
+              if(data !== "null"){
+                if(data.length > 0){
+                  const guardians = JSON.parse(data);
+                  vue.guardians = guardians;
+                }
+              }
+            })
+            .fail(function(err) {
+              alert("Something went wrong. Please, reload the page.");
+              console.log(JSON.stringify(err))
+            })
         }
     });
 </script>
