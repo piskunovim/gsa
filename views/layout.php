@@ -37,6 +37,9 @@
               break;              
           case "financial-info":
               require DIR_VIEWS.'pages/financial-info.php';
+              break;              
+          case "account":
+              require DIR_VIEWS.'pages/account.php';
               break;
           case "admin":
               require DIR_VIEWS.'pages/admin.php';
@@ -46,7 +49,7 @@
       }
 
       // for admin page we have different scripts
-      if($currentPage != "admin" && $currentPage != "child-sheet" && $currentPage != "financial-info"){
+      if($currentPage != "admin" && $currentPage != "child-sheet" && $currentPage != "financial-info" && $currentPage != "account"){
         require DIR_VIEWS.'footer.php';
       }
     ?>

@@ -13,6 +13,18 @@ if($_SESSION["permission"] == "admin"){
 	// show response data in json format
 	echo json_encode($response);
 
+} elseif (isset($_SESSION["loggedin"])){
+
+	$users = new UserController();
+	$users->setId($_SESSION["id"]);
+	$response = $users->get();
+
+	// set response code - 200 OK
+	http_response_code(200);
+	 
+	// show response data in json format
+	echo json_encode($response);
+
 } else {
 	$response = array("status" => 0, "msg" => "You have no permissions for this operation.");
 	// set response code - 200 OK

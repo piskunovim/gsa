@@ -30,6 +30,9 @@
             <a class="nav-link js-scroll-trigger" href="/financial-info">View Financial Information</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="/account">Account</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="/about">About us</a>
           </li>
           <li class="nav-item">

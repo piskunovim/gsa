@@ -23,6 +23,7 @@
 
     /* Constants to use */
     define('CONST_EMAIL', 'your@email.com');
+    define('CONST_SUPPORT_EMAIL', 'support@email.com');
 
     /* Controllers Autoloader */
     spl_autoload_register(function ($controllerName) {
