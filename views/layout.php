@@ -46,7 +46,7 @@
       }
 
       // for admin page we have different scripts
-      if($currentPage != "admin" && $currentPage != "child-sheet"){
+      if($currentPage != "admin" && $currentPage != "child-sheet" && $currentPage != "financial-info"){
         require DIR_VIEWS.'footer.php';
       }
     ?>

@@ -16,18 +16,20 @@ if(isset($_SESSION["loggedin"])){
   </thead>
   <tbody>
     <tr  v-for="ch in childSheetShow">
-      <td>{{ ch.date }}</td>
-      <td>{{ ch.period }}</td>
-      <td>{{ ch.presence }}</td>
+      <td>{{ ch.date || "Not set" }}</td>
+      <td>{{ ch.period || "Not set" }}</td>
+      <td>{{ ch.presence || "Not set" }}</td>
     </tr>
   </tbody>
 </table>
+<div v-if="pageCount>0">
   <button @click="prevPage" :disabled="pageNumber==0" v-on:click="paginatedData">
     Previous
   </button>
   <button @click="nextPage" :disabled="pageNumber >= pageCount -1" v-on:click="paginatedData">
-    Next
+      Next
   </button>
+</div>
 </div>
 </main>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>

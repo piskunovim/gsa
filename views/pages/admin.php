@@ -1,5 +1,6 @@
 <?php
 if($_SESSION["permission"] == "admin"){
+	echo 1;
 ?>
 <br><br><br>
 <main id="app">
@@ -324,7 +325,7 @@ if($_SESSION["permission"] == "admin"){
 				<br>
 				<label>Сhild's ID:</label>
 				<input type="text"  id="scheduleChildId"  v-model="scheduleChildId" v-on:change="getChildSheet" size="7">
-					<button type="button" class="btn btn-success" data-toggle="modal" data-target="#newChildSheetModal" style="float:right;" v-on:click="showAddChildModal" v-if="childSheetName">
+					<button type="button" class="btn btn-success" data-toggle="modal" data-target="#newChildSheetModal" style="float:right;" v-on:click="showAddChildSheetModal" v-if="childSheetName">
 						Add child sheet instance
 					</button>
 				<div class="child-sheet" v-if="childSheet.length > 0">
@@ -339,15 +340,9 @@ if($_SESSION["permission"] == "admin"){
 					</thead>
 					<tbody>
 					<tr v-for="cs in childSheet">
-						<td v-if="cs.date">{{ cs.date }}</td>
-						<td v-else>No content</td>
-
-						<td v-if="cs.date">{{ cs.period }}</td>
-						<td v-else>No content</td>
-
-						<td v-if="cs.date">{{ cs.presence }}</td>
-						<td v-else>No content</td>
-
+						<td v-if="cs.date">{{ cs.date || "Not set" }}</td>
+						<td v-if="cs.date">{{ cs.period || "Not set" }}</td>
+						<td v-if="cs.date">{{ cs.presence || "Not set" }}</td>
 						<td><a href="#!" class="action" v-on:click="showEditChildSheetModal(cs)">Edit</a> | <a href="#!" class="action" v-on:click="deleteChildSheetInstance(cs.id)">Remove</a></td>
 					</tr>
 					</tbody>
@@ -365,7 +360,7 @@ if($_SESSION["permission"] == "admin"){
 					<div class="modal-content">
 						<div class="modal-header">
 							<h5 v-if="editChildSheet==0" class="modal-title" id="childSheetModalLabel">Add child sheet instance - {{ childSheetName }}</h5>
-							<h5 v-else class="modal-title" id="childSheetModalLabel">Edit shild sheet instance</h5>
+							<h5 v-else class="modal-title" id="childSheetModalLabel">Edit child sheet instance</h5>
 							<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="clearChildSheetModal">
 								<span aria-hidden="true">&times;</span>
 							</button>
@@ -398,8 +393,172 @@ if($_SESSION["permission"] == "admin"){
 			<!-- Invoice information  -->
 			<div class="tab-pane fade" id="nav-invoice" role="tabpanel" aria-labelledby="nav-invoice-tab">
 				<br>
-				Invoice information will be set here.
+				<label>Сhild's ID:</label>
+				<input type="text"  id="invoiceChildId"  v-model="invoiceChildId" v-on:change="getInvoice" size="7">
+					<button type="button" class="btn btn-success" data-toggle="modal" data-target="#newInvoiceModal" style="float:right;" v-on:click="showAddInvoiceModal" v-if="invoiceName">
+						Add invoice
+					</button>
+				<div class="invoice" v-if="invoices.length > 0">
+					<h3>{{ invoiceName }}</h3>
+
+					<div v-for="i in invoices">
+						<p>{{ i.years }}</p>
+						<table class="table table-striped">
+						  <thead>
+						    <tr>
+						      <th scope="col" class="bg-warning">Term 1</th>
+						      <th scope="col" class="bg-warning">Term 2</th>
+						      <th scope="col" class="bg-warning">Term 3</th>
+						      <th><a href="#!" class="action" v-on:click="showEditInvoiceModal(i)">Edit</a> | <a href="#!" class="action" v-on:click="deleteInvoice(i.id)">Remove</a></th>
+						    </tr>
+						  </thead>
+						  <tbody>
+						    <tr>
+						      <td>{{ i.paymentTerm1 || "Not Set" }}</td>
+						      <td>{{ i.paymentTerm2 || "Not Set" }}</td>
+						      <td>{{ i.paymentTerm3 || "Not Set" }}</td>
+						    </tr>
+						    <tr>
+						      <td><span v-bind:class="{ 'text-success' : i.statusTerm1 == 1, 'text-warning' : i.statusTerm1 == 2, 'text-danger' : i.statusTerm1 == 3 }">{{ i.statusTextTerm1 || "Not Set" }}</span></td>
+						      <td><span v-bind:class="{ 'text-success' : i.statusTerm2 == 1, 'text-warning' : i.statusTerm2 == 2, 'text-danger' : i.statusTerm2 == 3 }">{{ i.statusTextTerm2 || "Not Set" }}</span></td>
+						      <td><span v-bind:class="{ 'text-success' : i.statusTerm3 == 1, 'text-warning' : i.statusTerm3 == 2, 'text-danger' : i.statusTerm3 == 3 }">{{ i.statusTextTerm3 || "Not Set" }}</span></td>
+						    </tr>
+						    <tr>
+						      <td><a v-bind:href="i.invoiceLinkTerm1">View Invoice</a></td>
+						      <td><a v-bind:href="i.invoiceLinkTerm2">View Invoice</a></td>
+						      <td><a v-bind:href="i.invoiceLinkTerm3">View Invoice</a></td>
+						    </tr>
+						  </tbody>
+						</table>
+					</div>
+				</div>
+				<div v-else>
+					<br>
+					<h3 v-if="invoiceName">{{ invoiceName }} - No data for this child</h3>
+					Nothing to show yet. Please, specify child id and press Enter to load financial information.
+				</div>
 			</div>
+
+			<!-- Modal For Invoice  -->
+			<div class="modal fade" id="newInvoiceModal" tabindex="-1" role="dialog" aria-labelledby="newInvoiceModal" aria-hidden="true">
+				<div class="modal-dialog modal-lg" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 v-if="editInvoice==0" class="modal-title" id="invoiceModalLabel">Add invoice - {{ invoiceName }}</h5>
+							<h5 v-else class="modal-title" id="invoiceModalLabel">Edit invoice</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close" v-on:click="clearInvoiceModal">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="invoiceYears">Years</label> 
+								<input type="text" class="form-control" id="invoiceYears"  v-model="newInvoice.years" placeholder="2017/2018 (Text)">
+							</div>
+							
+
+							<ul class="nav nav-tabs" id="invoiceTab" role="tablist">
+							  <li class="nav-item">
+							    <a class="nav-link active" id="term1-tab" data-toggle="tab" href="#term1" role="tab" aria-controls="term1" aria-selected="true">Term 1</a>
+							  </li>
+							  <li class="nav-item">
+							    <a class="nav-link" id="term2-tab" data-toggle="tab" href="#term2" role="tab" aria-controls="term2" aria-selected="false">Term 2</a>
+							  </li>
+							  <li class="nav-item">
+							    <a class="nav-link" id="term3-tab" data-toggle="tab" href="#term3" role="tab" aria-controls="term3" aria-selected="false">Term 3</a>
+							  </li>
+							</ul>
+							<div class="tab-content" id="invoiceTabContent">
+							  <!-- Term 1 started -->
+							  <div class="tab-pane fade show active" id="term1" role="tabpanel" aria-labelledby="term1-tab">
+								<div class="form-group">
+									<label for="invoicePaymentTerm1">Payment Term 1</label> 
+									<input type="text" class="form-control" id="invoicePaymentTerm1"  v-model="newInvoice.paymentTerm1">
+								</div>
+								<div class="form-group">
+									<label for="invoiceStatusTerm1">Status Term 1</label> 
+									<select class="custom-select" id="invoiceStatusTerm1" v-model="newInvoice.statusTerm1" >
+										<option disabled value="">Please select one</option>
+										<option value="1">Paid</option>
+										<option value="2">Partially paid</option>
+										<option value="3">Unpaid</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="invoiceStatusTextTerm1">Status Text Term 1</label> 
+									<input type="text" class="form-control" id="invoiceStatusTextTerm1"  v-model="newInvoice.statusTextTerm1">
+								</div>
+								<div class="form-group">
+									<label for="invoiceLinkTerm1">Invoice Link Term 1</label> 
+									<input type="text" class="form-control" id="invoiceLinkTerm1"  v-model="newInvoice.invoiceLinkTerm1">
+								</div>
+							  </div><!-- Term 1 finished -->
+
+							  <!-- Term 2 started -->
+							  <div class="tab-pane fade" id="term2" role="tabpanel" aria-labelledby="term2-tab">
+								<div class="form-group">
+									<label for="invoicePaymentTerm2">Payment Term 2</label> 
+									<input type="text" class="form-control" id="invoicePaymentTerm2"  v-model="newInvoice.paymentTerm2">
+								</div>
+								<div class="form-group">
+									<label for="invoiceStatusTerm2">Status Term 2</label> 
+									<select class="custom-select" id="invoiceStatusTerm2" v-model="newInvoice.statusTerm2" >
+										<option disabled value="">Please select one</option>
+										<option value="1">Paid</option>
+										<option value="2">Partially paid</option>
+										<option value="3">Unpaid</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="invoiceStatusTextTerm2">Status Text Term 2</label> 
+									<input type="text" class="form-control" id="invoiceStatusTextTerm2"  v-model="newInvoice.statusTextTerm2">
+								</div>
+								<div class="form-group">
+									<label for="invoiceLinkTerm2">Invoice Link Term 2</label> 
+									<input type="text" class="form-control" id="invoiceLinkTerm2"  v-model="newInvoice.invoiceLinkTerm2">
+								</div>
+							  </div><!-- Term 2 finished -->
+							  
+
+							  <!-- Term 3 started -->
+							  <div class="tab-pane fade" id="term3" role="tabpanel" aria-labelledby="term3-tab">
+								<div class="form-group">
+									<label for="invoicePaymentTerm3">Payment Term 3</label> 
+									<input type="text" class="form-control" id="invoicePaymentTerm3"  v-model="newInvoice.paymentTerm3">
+								</div>
+								<div class="form-group">
+									<label for="invoiceStatusTerm3">Status Term 3</label> 
+									<select class="custom-select" id="invoiceStatusTerm3" v-model="newInvoice.statusTerm3" >
+										<option disabled value="">Please select one</option>
+										<option value="1">Paid</option>
+										<option value="2">Partially paid</option>
+										<option value="3">Unpaid</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="invoiceStatusTextTerm3">Status Text Term 3</label> 
+									<input type="text" class="form-control" id="invoiceStatusTextTerm3"  v-model="newInvoice.statusTextTerm3">
+								</div>
+								<div class="form-group">
+									<label for="invoiceLinkTerm3">Invoice Link Term 3</label> 
+									<input type="text" class="form-control" id="invoiceLinkTerm3"  v-model="newInvoice.invoiceLinkTerm3">
+								</div>
+							  </div><!-- Term 3 finished -->
+
+							</div>
+
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-secondary" data-dismiss="modal" v-on:click="clearInvoiceModal">Close</button>
+							<button v-if="editInvoice==0" type="button" class="btn btn-primary add-vacancy" v-on:click="addInvoice">Submit</button>
+							<!-- editChild hidden by default -->
+							<button v-if="editInvoice>0" type="button" class="btn btn-primary" v-on:click="updateInvoice">Update Child Sheet Instance</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Invoice ends -->
 
 
 		</div>
@@ -460,7 +619,12 @@ if($_SESSION["permission"] == "admin"){
 	        storedChildSheet: [],
 	        newChildSheetInstance: {}, // used for editing child sheet too
 	        editChildSheet: 0,
-
+	        invoiceChildId: "",  // <======= INVOICE
+	        invoiceName: "",
+	        invoices: [],
+	        storedInvoices: [],
+	        newInvoice: {}, // used for editing invoice too
+	        editInvoice: 0,
 	    },
 	    methods: {
 	      	updateUserList: ()=>{
@@ -608,7 +772,18 @@ if($_SESSION["permission"] == "admin"){
 	      			vue.users = users;
 	      		} else {
 	      			let userFilterString = vue.userFilter;
-	      			vue.users = users.filter(u => u.username.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1 || u.firstName.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1 ||  u.lastName.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1);
+	      			vue.users = users.filter(u => { 
+	      				u.firstName = u.firstName ? u.firstName : "";
+	      				u.lastName = u.lastName ? u.lastName : "";
+
+	      				if(u.username.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1 || 
+	      				u.firstName.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1 ||  
+	      				u.lastName.toLowerCase().indexOf(userFilterString.toLowerCase()) !== -1){
+	      					return 1;
+	      				} else {
+	      					return 0;
+	      				}
+	      			});
 	      		}
 	      	},
 	      	showUserChildHints: () => {
@@ -1050,6 +1225,153 @@ if($_SESSION["permission"] == "admin"){
 	      		vue.newChildSheetInstance = {};
 	      	    $(".datepicker").flatpickr({ dateFormat: 'Y-m-d' });
 	      	},
+
+
+	      	/*==================================== INVOICE ===========================================*/
+	      	getInvoice: ()=>{
+	      		
+	      		vue.updateInvoiceList();
+
+	      		let found = false
+	      		for(let c of vue.children){
+	      			if(c.id == vue.invoiceChildId){
+	      				vue.invoiceName = c.firstName + " " + c.lastName;	
+	      				found = true;
+	      				break;
+	      			}
+	      		}
+	      		if(!found){
+	      			vue.invoiceName	= "Child not found, please clarify child id by using 'Child' tab."	
+	      		}
+	      	},
+	      	updateInvoiceList: ()=>{
+	      		$.ajax({
+	      			url: '/api/invoice/read.php?childId='+vue.invoiceChildId,
+	      			type: 'GET',
+	      		}).done(function(data) {
+	      			if(data !== "null"){
+		      			if(data.length > 0){
+		      				vue.invoices = JSON.parse(data);
+		      				vue.storedInvoices = JSON.parse(data);
+		      			}
+	      			}
+	      		})
+	      		.fail(function(err) {
+	      			alert(JSON.stringify(err));
+	      		});
+	      	},
+	      	/* To add invoice instance */
+	      	addInvoice: () =>{
+	      		if(!vue.invoiceChildId){
+	      			alert("Please specify child id");
+	      			return;
+	      		}
+
+	      		vue.newInvoice.childId = vue.invoiceChildId;
+
+	      		if(!vue.newInvoice.years){
+	      			alert("In order to create new instance instance you must fill years field.")
+	      			return;
+	      		}
+
+	      		$.post('/api/invoice/create.php',{ ...vue.newInvoice }).done(function(response) {
+	      			$("#newInvoiceModal").modal("hide");
+	      			try{
+	      				const r = JSON.parse(response);
+	      				if(r.msg){
+	      					console.log(r.msg);
+	      				} else {
+	      					alert("Failed to parse response data.");
+	      				}
+	      			} catch(e){
+	      				alert(e);
+	      			}
+	      			vue.clearInvoiceModal();  
+	      			vue.updateInvoiceList();
+	      			/*if(JSON.parse(response).status !== "error"){
+	      				console.log(response.status);
+	      			}*/
+	      		}).fail(function(){
+	      			alert("Failed to send your data. Please, try again.")
+	      		});
+	      		
+	      	},
+	      	/* To update invoice instance */
+	      	updateInvoice: ()=>{
+	      		
+	      		if(!vue.newInvoice.years){
+	      			alert("In order to update invoice instance you must fill at least years field.")
+	      			return;
+	      		}
+
+	      		const invoice = { 
+	      			...vue.newInvoice
+	      		};
+	      		$.ajax({
+	      			url: '/api/invoice/update.php',
+	      			type: 'POST',
+	      			data: invoice,
+	      		}).done(function(response) {
+	      			try{
+	      				const r = JSON.parse(response);
+	      				if(r.msg){
+	      					console.log(r.msg);
+	      				} else {
+	      					alert("Failed to parse response data.");
+	      				}
+	      			} catch(e){
+	      				alert(e);
+	      			}
+	      			vue.clearInvoiceModal();
+	      		})
+	      		.fail(function() {
+	      			alert("Failed to update invoice. Please, try again.");
+	      		});
+	      		$("#newInvoiceModal").modal("hide");
+	      		vue.updateInvoiceList();
+	      		
+	      	},
+	      	/* Two methods to show correct button in the modal form */
+	      	showEditInvoiceModal: (invoice) =>{
+	      		vue.clearInvoiceModal();
+	      		vue.editInvoice = 1;
+	      		vue.newInvoice = JSON.parse(JSON.stringify(invoice));
+
+	      		$("#newInvoiceModal").modal("show");
+	      	},
+	      	showAddInvoiceModal: () =>{
+	      		vue.clearInvoiceModal();
+	      		vue.editInvoice = 0;
+	      	},
+	      	/* To remove invoice instance from the database */
+	      	deleteInvoice: (id) => {
+	      		$.ajax({
+	      			url: '/api/invoice/delete.php?id='+id,
+	      			type: 'GET',
+	      		}).done(function(response) {
+	      			try{
+	      				const r = JSON.parse(response);
+	      				if(r.msg){
+	      					alert(r.msg);
+	      				} else {
+	      					alert("Failed to parse response data.");
+	      				}
+	      			} catch(e){
+	      				alert(e);
+	      			}
+	      			vue.updateInvoiceList();
+	      		})
+	      		.fail(function() {
+	      			alert("Failed to remove invoice instance. Please, try again.");
+	      		});
+	      	},
+
+	      	/* To clear modal form when on closing */
+	      	clearInvoiceModal: ()=>{
+	      		vue.newInvoice = {};
+	      	},
+
+
 	      },
 	      /* Initial loading */
 	      created: ()=>{	

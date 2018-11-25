@@ -20,7 +20,7 @@ $createChildSheet->setChildId($childId);
 $createChildSheet->setDate($date);
 $createChildSheet->setPeriod($period);
 $createChildSheet->setPresence($presence);
-//print_r($createGuardian);
+//print_r($createChildSheet);
 //exit;
 $response = array("status" => 0, "msg" => "Failed to create child sheet instance. Please, try again.");
 
