@@ -348,7 +348,7 @@ if($_SESSION["permission"] == "admin"){
 						<td v-if="cs.date">{{ cs.presence }}</td>
 						<td v-else>No content</td>
 
-						<td><a href="#!" class="action" v-on:click="showEditChildSheetModal(ch)">Edit</a> | <a href="#!" class="action" v-on:click="deleteChildSheetInstance(ch.id)">Remove</a></td>
+						<td><a href="#!" class="action" v-on:click="showEditChildSheetModal(cs)">Edit</a> | <a href="#!" class="action" v-on:click="deleteChildSheetInstance(cs.id)">Remove</a></td>
 					</tr>
 					</tbody>
 					</table>
@@ -925,7 +925,7 @@ if($_SESSION["permission"] == "admin"){
 	      	},
 	      	updateChildSheetList: ()=>{
 	      		$.ajax({
-	      			url: '/api/childSheet/read.php?userId='+vue.scheduleChildId,
+	      			url: '/api/childSheet/read.php?childId='+vue.scheduleChildId,
 	      			type: 'GET',
 	      		}).done(function(data) {
 	      			if(data !== "null"){
@@ -942,11 +942,11 @@ if($_SESSION["permission"] == "admin"){
 	      	/* To add child sheet instance */
 	      	addChildSheetInstance: () =>{
 	      		if(!vue.scheduleChildId){
-	      			alert("Please specify user id");
+	      			alert("Please specify child id");
 	      			return;
 	      		}
 
-	      		vue.newChildSheetInstance.userId = vue.scheduleChildId;
+	      		vue.newChildSheetInstance.childId = vue.scheduleChildId;
 
 	      		if(!vue.newChildSheetInstance.date && !vue.newChildSheetInstance.period && !vue.newChildSheetInstance.presence ){
 	      			alert("In order to create new child sheet instance you must fill at least one field.")

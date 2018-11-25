@@ -22,9 +22,9 @@ class ChildSheetController {
      */
     protected $presence;
      /**
-     * @var string $userId
+     * @var string $childId
      */
-    protected $userId;
+    protected $childId;
      /**
      * @param string $id
      */
@@ -40,18 +40,18 @@ class ChildSheetController {
         return $this->id;
     }
      /**
-     * @param string $userId
+     * @param string $childId
      */
-    public function setUserId($userId)
+    public function setChildId($childId)
     {
-        $this->userId = $userId;
+        $this->childId = $childId;
     }
     /**
      * @return string
      */
-    public function getUserId()
+    public function getChildId()
     {
-        return $this->userId;
+        return $this->childId;
     }
     /**
      * @param string $date
@@ -117,9 +117,9 @@ class ChildSheetController {
            $insertChildSheetQueryMiddle[] = "presence=:presence";
            $insertChildSheetParams['presence'] = $this->presence;
         }
-        if($this->userId){
-           $insertChildSheetQueryMiddle[] = "userId=:userId";
-           $insertChildSheetParams['userId'] = $this->userId;
+        if($this->childId){
+           $insertChildSheetQueryMiddle[] = "childId=:childId";
+           $insertChildSheetParams['childId'] = $this->childId;
         }
 
         $insertChildSheetQuery .= implode(', ', $insertChildSheetQueryMiddle);
@@ -152,7 +152,7 @@ class ChildSheetController {
            $updateChildSheetParams['presence'] = $this->presence;
         }
 
-        $updateChildQuery .= implode(', ', $insertChildSheetQueryMiddle)." WHERE id=:id";
+        $updateChildQuery .= implode(', ', $updateChildSheetQueryMiddle)." WHERE id=:id";
         $updateChildSheetParams['id'] = $this->id;  
 
         $db->query($updateChildQuery, $updateChildSheetParams);
@@ -169,9 +169,9 @@ class ChildSheetController {
     }
 
     public function get(){
-        if($this->userId){
+        if($this->childId){
           $db = new DatabaseController();
-          $childSheet = $db->query("SELECT * FROM childSheet WHERE userId=:userId", array('userId' => $this->userId));
+          $childSheet = $db->query("SELECT * FROM childSheet WHERE childId=:childId ORDER BY date DESC", array('childId' => $this->childId));
           $db->closeConnection();
           $childSheetResponse = (count($childSheet)) ? $childSheet : null;
           return $childSheetResponse;

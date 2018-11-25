@@ -3,7 +3,7 @@
 require dirname( __FILE__ )."/../../config.php";
 
 $childSheet = new ChildSheetController();
-$childSheet->setUserId($_GET['userId']);
+$childSheet->setChildId($_GET['childId']);
 $response = $childSheet->get();
 
 // set response code - 200 OK

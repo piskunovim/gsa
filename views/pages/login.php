@@ -41,8 +41,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 // Store data in session variables
                 $_SESSION["loggedin"] = true;
                 $_SESSION["id"] = $userData['id'];
+                $_SESSION["childId"] = $userData['childId'];
                 $_SESSION["username"] = $userData['username']; 
                 $_SESSION["permission"] = $userData['permission'];
+
 
                 // Redirect user to welcome page
                 header("location: /");

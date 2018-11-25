@@ -252,9 +252,9 @@ class ChildController {
     public function get(){
         if($this->id){
           $db = new DatabaseController();
-          $user = $db->query("SELECT * FROM children WHERE id=:id", array('id' => $this->id));
+          $child = $db->query("SELECT * FROM children WHERE id=:id", array('id' => $this->id));
           $db->closeConnection();
-          return $user[0];
+          return $child[0];
         } else{
           $db = new DatabaseController();
           $users = $db->query("SELECT * FROM children");
