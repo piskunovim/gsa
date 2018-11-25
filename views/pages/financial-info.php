@@ -59,7 +59,6 @@ if(isset($_SESSION["loggedin"])){
         invoices:[],
         invoicesShow: [],
         invoiceName: "",
-        childId: "<?= $_SESSION["childId"] ?>",
         size: 5,
         pageNumber: 0,
         pageCount: 0
@@ -85,7 +84,7 @@ if(isset($_SESSION["loggedin"])){
         /* Initial loading */
         created: ()=>{
           $.ajax({
-              url: '/api/invoice/read.php?childId=<?= $_SESSION["childId"] ?>',
+              url: '/api/invoice/read.php',
               type: 'GET',
             }).done(function(data) {
               if(data !== "null"){
@@ -102,7 +101,7 @@ if(isset($_SESSION["loggedin"])){
             });
 
             $.ajax({
-              url: '/api/children/read.php?childId=<?= $_SESSION["childId"] ?>',
+              url: '/api/children/read.php',
               type: 'GET',
             }).done(function(data) {
               //console.log(data);

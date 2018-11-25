@@ -44,7 +44,6 @@ if(isset($_SESSION["loggedin"])){
         childSheet:[],
         childSheetShow: [],
         childSheetName: "",
-        childId: "<?= $_SESSION["childId"] ?>",
         size: 20,
         pageNumber: 0,
         pageCount: 0
@@ -70,7 +69,7 @@ if(isset($_SESSION["loggedin"])){
         /* Initial loading */
         created: ()=>{
           $.ajax({
-              url: '/api/childSheet/read.php?childId=<?= $_SESSION["childId"] ?>',
+              url: '/api/childSheet/read.php',
               type: 'GET',
             }).done(function(data) {
               if(data !== "null"){
@@ -87,7 +86,7 @@ if(isset($_SESSION["loggedin"])){
             });
 
             $.ajax({
-              url: '/api/children/read.php?childId=<?= $_SESSION["childId"] ?>',
+              url: '/api/children/read.php',
               type: 'GET',
             }).done(function(data) {
               //console.log(data);

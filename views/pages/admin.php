@@ -1,6 +1,5 @@
 <?php
 if($_SESSION["permission"] == "admin"){
-	echo 1;
 ?>
 <br><br><br>
 <main id="app">
